@@ -940,12 +940,12 @@
                     tableHtml += `
                         <tr>
                             <td>${formatDate(f.SubmittedAt)}</td>
-                            <td>${f.Patient || '-'}</td>
+                            <td>${f.PatientName || '-'}</td>
                             <td>${f.MemberPatientRelation || '-'}</td>
                             <td>${f.DiseaseName || '-'}</td>
                             <td>${renderStatusBadge(f.Status)}</td>
                             <td>${f.Hospital1 || '-'}</td>
-                            <td>${formatDateTime(f.Appoinment1)}</td>
+                            <td>${formatDateTime(f.Appointment1)}</td>
                         </tr>
                     `;
                 });
@@ -997,7 +997,7 @@
                     tableHtml += `
                         <tr>
                             <td>${formatDate(f.SubmittedAt)}</td>
-                            <td>${f.Patient || '-'}</td>
+                            <td>${f.PatientName || '-'}</td>
                             <td>${f.MemberPatientRelation || '-'}</td>
                             <td>${f.Hospital || '-'}</td>
                             <td>${f.Program || '-'}</td>
