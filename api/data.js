@@ -21,6 +21,22 @@ export default async function handler(req, res) {
         return res.status(400).json({ error: 'Missing required parameters' });
     }
 
+    // 🔒 보안: filterByFormula 필수 - 전체 조회 차단
+    if (!filterByFormula || filterByFormula.trim() === '') {
+        return res.status(403).json({ error: 'Unauthorized request' });
+    }
+
+    // 🔒 보안: OrgList 테이블은 AccessCode 필터가 있어야만 조회 가능
+    const ORG_LIST_TABLE = 'tblkdRKmvjRjvAfzz';
+    if (tableId === ORG_LIST_TABLE && !filterByFormula.includes('AccessCode')) {
+        return res.status(403).json({ error: 'Unauthorized request' });
+    }
+
+    // 🔒 보안: 다른 테이블은 OrgName 필터가 있어야만 조회 가능
+    if (tableId !== ORG_LIST_TABLE && !filterByFormula.includes('OrgName')) {
+        return res.status(403).json({ error: 'Unauthorized request' });
+    }
+
     try {
         const url = new URL(`https://api.airtable.com/v0/${BASE_ID}/${tableId}`);
         
