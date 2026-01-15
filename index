@@ -1,0 +1,1074 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>핀스케어 기업 관리자</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --color-primary: #1e3a5f;
+            --color-primary-light: #2d5a8a;
+            --color-secondary: #4a7c9b;
+            --color-accent: #3d8b7a;
+            --color-accent-light: #e8f4f1;
+            --color-warning: #c17f59;
+            --color-bg: #f8f9fa;
+            --color-card: #ffffff;
+            --color-text: #2c3e50;
+            --color-text-light: #6c7a89;
+            --color-border: #e1e5e9;
+            --color-status-progress: #5b8def;
+            --color-status-booked: #3d8b7a;
+            --color-status-done: #7c8a96;
+            --shadow-sm: 0 1px 3px rgba(0,0,0,0.06);
+            --shadow-md: 0 4px 12px rgba(0,0,0,0.08);
+            --shadow-lg: 0 8px 24px rgba(0,0,0,0.1);
+            --radius-sm: 6px;
+            --radius-md: 10px;
+            --radius-lg: 16px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Noto Sans KR', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--color-bg);
+            color: var(--color-text);
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+
+        /* Login Screen */
+        .login-screen {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #f5f7fa 0%, #e4e8ec 100%);
+            padding: 20px;
+        }
+
+        .login-card {
+            background: var(--color-card);
+            padding: 48px 40px;
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-lg);
+            width: 100%;
+            max-width: 400px;
+            text-align: center;
+        }
+
+        .login-logo {
+            width: 160px;
+            height: auto;
+            margin-bottom: 12px;
+        }
+
+        .login-title {
+            font-size: 22px;
+            font-weight: 600;
+            color: var(--color-primary);
+            margin-bottom: 8px;
+        }
+
+        .login-subtitle {
+            font-size: 14px;
+            color: var(--color-text-light);
+            margin-bottom: 32px;
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+            text-align: left;
+        }
+
+        .input-label {
+            display: block;
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--color-text);
+            margin-bottom: 8px;
+        }
+
+        .input-field {
+            width: 100%;
+            padding: 14px 16px;
+            font-size: 15px;
+            font-family: inherit;
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-md);
+            background: var(--color-bg);
+            transition: all 0.2s ease;
+        }
+
+        .input-field:focus {
+            outline: none;
+            border-color: var(--color-primary);
+            background: var(--color-card);
+            box-shadow: 0 0 0 3px rgba(30, 58, 95, 0.1);
+        }
+
+        .login-btn {
+            width: 100%;
+            padding: 14px 24px;
+            font-size: 15px;
+            font-weight: 600;
+            font-family: inherit;
+            color: white;
+            background: var(--color-primary);
+            border: none;
+            border-radius: var(--radius-md);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            margin-top: 8px;
+        }
+
+        .login-btn:hover {
+            background: var(--color-primary-light);
+            transform: translateY(-1px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .login-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .login-error {
+            color: #c0392b;
+            font-size: 13px;
+            margin-top: 16px;
+            display: none;
+        }
+
+        /* Dashboard */
+        .dashboard {
+            display: none;
+            min-height: 100vh;
+        }
+
+        .header {
+            background: var(--color-card);
+            border-bottom: 1px solid var(--color-border);
+            padding: 16px 24px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header-inner {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .header-logo {
+            height: 32px;
+            width: auto;
+        }
+
+        .header-divider {
+            width: 1px;
+            height: 24px;
+            background: var(--color-border);
+        }
+
+        .org-name {
+            font-size: 17px;
+            font-weight: 600;
+            color: var(--color-primary);
+        }
+
+        .logout-btn {
+            padding: 8px 16px;
+            font-size: 13px;
+            font-family: inherit;
+            color: var(--color-text-light);
+            background: transparent;
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .logout-btn:hover {
+            background: var(--color-bg);
+            color: var(--color-text);
+        }
+
+        .main-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 32px 24px;
+        }
+
+        /* Plan Card */
+        .plan-card {
+            background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-light) 100%);
+            color: white;
+            padding: 28px 32px;
+            border-radius: var(--radius-lg);
+            margin-bottom: 28px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: var(--shadow-md);
+        }
+
+        .plan-info h2 {
+            font-size: 14px;
+            font-weight: 400;
+            opacity: 0.85;
+            margin-bottom: 6px;
+        }
+
+        .plan-name {
+            font-size: 26px;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+
+        .plan-period {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+
+        .plan-days {
+            text-align: right;
+        }
+
+        .plan-days-number {
+            font-size: 42px;
+            font-weight: 700;
+            line-height: 1;
+        }
+
+        .plan-days-label {
+            font-size: 14px;
+            opacity: 0.85;
+            margin-top: 4px;
+        }
+
+        /* Stats Section */
+        .stats-section {
+            margin-bottom: 32px;
+        }
+
+        .section-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--color-text);
+            margin-bottom: 16px;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+        }
+
+        .stat-card {
+            background: var(--color-card);
+            padding: 24px;
+            border-radius: var(--radius-md);
+            box-shadow: var(--shadow-sm);
+            border: 1px solid var(--color-border);
+        }
+
+        .stat-label {
+            font-size: 13px;
+            color: var(--color-text-light);
+            margin-bottom: 8px;
+        }
+
+        .stat-value {
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--color-primary);
+        }
+
+        .stat-value.accent {
+            color: var(--color-accent);
+        }
+
+        .stat-unit {
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--color-text-light);
+            margin-left: 4px;
+        }
+
+        /* Status Stats */
+        .status-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 12px;
+            margin-top: 16px;
+        }
+
+        .status-stat {
+            background: var(--color-card);
+            padding: 16px 20px;
+            border-radius: var(--radius-md);
+            border: 1px solid var(--color-border);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .status-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+
+        .status-dot.progress { background: var(--color-status-progress); }
+        .status-dot.booked { background: var(--color-status-booked); }
+        .status-dot.done { background: var(--color-status-done); }
+
+        .status-info {
+            flex: 1;
+        }
+
+        .status-name {
+            font-size: 12px;
+            color: var(--color-text-light);
+        }
+
+        .status-count {
+            font-size: 20px;
+            font-weight: 600;
+            color: var(--color-text);
+        }
+
+        /* Records Section */
+        .records-section {
+            background: var(--color-card);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-sm);
+            border: 1px solid var(--color-border);
+            overflow: hidden;
+        }
+
+        .tabs {
+            display: flex;
+            border-bottom: 1px solid var(--color-border);
+            background: var(--color-bg);
+        }
+
+        .tab {
+            flex: 1;
+            padding: 16px 24px;
+            font-size: 14px;
+            font-weight: 500;
+            font-family: inherit;
+            color: var(--color-text-light);
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            position: relative;
+        }
+
+        .tab:hover {
+            color: var(--color-text);
+        }
+
+        .tab.active {
+            color: var(--color-primary);
+            background: var(--color-card);
+        }
+
+        .tab.active::after {
+            content: '';
+            position: absolute;
+            bottom: -1px;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: var(--color-primary);
+        }
+
+        .tab-content {
+            display: none;
+            padding: 24px;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        /* Table */
+        .table-wrapper {
+            overflow-x: auto;
+        }
+
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+        }
+
+        .data-table th {
+            text-align: left;
+            padding: 12px 16px;
+            font-weight: 500;
+            color: var(--color-text-light);
+            background: var(--color-bg);
+            border-bottom: 1px solid var(--color-border);
+            white-space: nowrap;
+        }
+
+        .data-table td {
+            padding: 14px 16px;
+            border-bottom: 1px solid var(--color-border);
+            color: var(--color-text);
+        }
+
+        .data-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .data-table tr:hover td {
+            background: var(--color-bg);
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 4px 10px;
+            font-size: 12px;
+            font-weight: 500;
+            border-radius: 20px;
+        }
+
+        .status-badge.progress {
+            background: #e8f1fd;
+            color: #3b7ddd;
+        }
+
+        .status-badge.booked {
+            background: var(--color-accent-light);
+            color: var(--color-accent);
+        }
+
+        .status-badge.done {
+            background: #f0f2f4;
+            color: #6c7a89;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--color-text-light);
+        }
+
+        .empty-state-icon {
+            font-size: 48px;
+            margin-bottom: 16px;
+            opacity: 0.5;
+        }
+
+        .empty-state-text {
+            font-size: 14px;
+        }
+
+        /* Loading */
+        .loading {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 60px 20px;
+        }
+
+        .spinner {
+            width: 32px;
+            height: 32px;
+            border: 3px solid var(--color-border);
+            border-top-color: var(--color-primary);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .header {
+                padding: 12px 16px;
+            }
+
+            .org-name {
+                font-size: 15px;
+            }
+
+            .main-content {
+                padding: 20px 16px;
+            }
+
+            .plan-card {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 20px;
+                padding: 24px;
+            }
+
+            .plan-days {
+                text-align: left;
+            }
+
+            .plan-days-number {
+                font-size: 36px;
+            }
+
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .status-stats {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .stat-value {
+                font-size: 24px;
+            }
+
+            .tabs {
+                overflow-x: auto;
+            }
+
+            .tab {
+                padding: 14px 16px;
+                white-space: nowrap;
+            }
+
+            .tab-content {
+                padding: 16px;
+            }
+
+            .data-table {
+                font-size: 12px;
+            }
+
+            .data-table th,
+            .data-table td {
+                padding: 10px 12px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .login-card {
+                padding: 32px 24px;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .status-stats {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Login Screen -->
+    <div id="loginScreen" class="login-screen">
+        <div class="login-card">
+            <img src="https://via.placeholder.com/160x40?text=FINSCARE" alt="핀스케어" class="login-logo" id="loginLogo">
+            <h1 class="login-title">기업 관리자</h1>
+            <p class="login-subtitle">접속 코드를 입력하여 대시보드에 접속하세요</p>
+            
+            <div class="input-group">
+                <label class="input-label" for="accessCode">접속 코드</label>
+                <input type="text" id="accessCode" class="input-field" placeholder="접속 코드를 입력하세요" autocomplete="off">
+            </div>
+            
+            <button id="loginBtn" class="login-btn" onclick="handleLogin()">접속하기</button>
+            <p id="loginError" class="login-error">접속 코드가 올바르지 않습니다.</p>
+        </div>
+    </div>
+
+    <!-- Dashboard -->
+    <div id="dashboard" class="dashboard">
+        <header class="header">
+            <div class="header-inner">
+                <div class="header-left">
+                    <img src="https://via.placeholder.com/120x32?text=FINSCARE" alt="핀스케어" class="header-logo" id="headerLogo">
+                    <div class="header-divider"></div>
+                    <span class="org-name" id="orgNameDisplay">기업명</span>
+                </div>
+                <button class="logout-btn" onclick="handleLogout()">로그아웃</button>
+            </div>
+        </header>
+
+        <main class="main-content">
+            <!-- Plan Card -->
+            <div class="plan-card">
+                <div class="plan-info">
+                    <h2>이용 중인 플랜</h2>
+                    <div class="plan-name" id="planName">-</div>
+                    <div class="plan-period" id="planPeriod">-</div>
+                </div>
+                <div class="plan-days">
+                    <div class="plan-days-number" id="planDaysLeft">-</div>
+                    <div class="plan-days-label">일 남음</div>
+                </div>
+            </div>
+
+            <!-- Stats Section -->
+            <section class="stats-section">
+                <h3 class="section-title">이용 현황</h3>
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-label">명의예약 이용 건수</div>
+                        <div class="stat-value" id="specialistCount">-</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">건강검진 이용 건수</div>
+                        <div class="stat-value" id="checkupCount">-</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">건강검진 총 절감액</div>
+                        <div class="stat-value accent" id="totalSavings">-<span class="stat-unit">원</span></div>
+                    </div>
+                </div>
+
+                <div class="status-stats">
+                    <div class="status-stat">
+                        <div class="status-dot progress"></div>
+                        <div class="status-info">
+                            <div class="status-name">진행중</div>
+                            <div class="status-count" id="statusProgress">-</div>
+                        </div>
+                    </div>
+                    <div class="status-stat">
+                        <div class="status-dot booked"></div>
+                        <div class="status-info">
+                            <div class="status-name">예약완료</div>
+                            <div class="status-count" id="statusBooked">-</div>
+                        </div>
+                    </div>
+                    <div class="status-stat">
+                        <div class="status-dot done"></div>
+                        <div class="status-info">
+                            <div class="status-name">완료</div>
+                            <div class="status-count" id="statusDone">-</div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Records Section -->
+            <section class="records-section">
+                <div class="tabs">
+                    <button class="tab active" data-tab="specialist" onclick="switchTab('specialist')">명의예약</button>
+                    <button class="tab" data-tab="checkup" onclick="switchTab('checkup')">건강검진</button>
+                </div>
+
+                <div id="specialistTab" class="tab-content active">
+                    <div id="specialistLoading" class="loading">
+                        <div class="spinner"></div>
+                    </div>
+                    <div id="specialistTable" class="table-wrapper" style="display:none;"></div>
+                </div>
+
+                <div id="checkupTab" class="tab-content">
+                    <div id="checkupLoading" class="loading">
+                        <div class="spinner"></div>
+                    </div>
+                    <div id="checkupTable" class="table-wrapper" style="display:none;"></div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script>
+        // Airtable Configuration (테이블 ID만 - API Key는 서버에서 관리)
+        const AIRTABLE_CONFIG = {
+            tables: {
+                specialist: 'tbluvWoEC5PkPjgAp',
+                checkup: 'tbl8FqfXZIRnMi13s',
+                orgList: 'tblkdRKmvjRjvAfzz'
+            }
+        };
+
+        // Status filters
+        const SPECIALIST_STATUS_FILTER = ['진행중', '예약완료', '진료완료', '비예약 완료'];
+        const CHECKUP_STATUS_FILTER = ['진행중', '예약완료', '검진완료'];
+
+        // Global state
+        let currentOrg = null;
+
+        // Airtable API helper (Vercel API Route 통해 호출)
+        async function airtableFetch(tableId, params = {}) {
+            const url = new URL('/api/airtable', window.location.origin);
+            url.searchParams.append('action', 'fetch');
+            url.searchParams.append('tableId', tableId);
+            
+            if (params.filterByFormula) {
+                url.searchParams.append('filterByFormula', params.filterByFormula);
+            }
+            if (params.offset) {
+                url.searchParams.append('offset', params.offset);
+            }
+
+            const response = await fetch(url);
+
+            if (!response.ok) {
+                throw new Error(`API error: ${response.status}`);
+            }
+
+            return response.json();
+        }
+
+        // Fetch all records with pagination
+        async function fetchAllRecords(tableId, filterFormula = '') {
+            let allRecords = [];
+            let offset = null;
+
+            do {
+                const params = {};
+                if (filterFormula) params.filterByFormula = filterFormula;
+                if (offset) params.offset = offset;
+
+                const data = await airtableFetch(tableId, params);
+                allRecords = allRecords.concat(data.records);
+                offset = data.offset;
+            } while (offset);
+
+            return allRecords;
+        }
+
+        // Login handler
+        async function handleLogin() {
+            const accessCode = document.getElementById('accessCode').value.trim();
+            const loginBtn = document.getElementById('loginBtn');
+            const loginError = document.getElementById('loginError');
+
+            if (!accessCode) {
+                loginError.textContent = '접속 코드를 입력해주세요.';
+                loginError.style.display = 'block';
+                return;
+            }
+
+            loginBtn.disabled = true;
+            loginBtn.textContent = '확인 중...';
+            loginError.style.display = 'none';
+
+            try {
+                const filterFormula = `{AccessCode} = '${accessCode}'`;
+                const data = await airtableFetch(AIRTABLE_CONFIG.tables.orgList, { filterByFormula: filterFormula });
+
+                if (data.records && data.records.length > 0) {
+                    currentOrg = data.records[0].fields;
+                    sessionStorage.setItem('orgData', JSON.stringify(currentOrg));
+                    showDashboard();
+                } else {
+                    loginError.textContent = '접속 코드가 올바르지 않습니다.';
+                    loginError.style.display = 'block';
+                }
+            } catch (error) {
+                console.error('Login error:', error);
+                loginError.textContent = '서버 연결에 실패했습니다. 잠시 후 다시 시도해주세요.';
+                loginError.style.display = 'block';
+            } finally {
+                loginBtn.disabled = false;
+                loginBtn.textContent = '접속하기';
+            }
+        }
+
+        // Logout handler
+        function handleLogout() {
+            sessionStorage.removeItem('orgData');
+            currentOrg = null;
+            document.getElementById('loginScreen').style.display = 'flex';
+            document.getElementById('dashboard').style.display = 'none';
+            document.getElementById('accessCode').value = '';
+        }
+
+        // Show dashboard
+        async function showDashboard() {
+            document.getElementById('loginScreen').style.display = 'none';
+            document.getElementById('dashboard').style.display = 'block';
+
+            // Display org info
+            document.getElementById('orgNameDisplay').textContent = currentOrg.OrgName || '기업명';
+
+            // Display plan info
+            displayPlanInfo();
+
+            // Load data
+            await loadDashboardData();
+        }
+
+        // Display plan information
+        function displayPlanInfo() {
+            const planName = currentOrg.PricePlan || '-';
+            const startDate = currentOrg.PaidPlanStartDate;
+            const endDate = currentOrg.PaidPlanEndDate;
+
+            document.getElementById('planName').textContent = planName;
+
+            if (startDate && endDate) {
+                const start = new Date(startDate);
+                const end = new Date(endDate);
+                const today = new Date();
+                
+                const formatDate = (date) => {
+                    return `${date.getFullYear()}.${String(date.getMonth() + 1).padStart(2, '0')}.${String(date.getDate()).padStart(2, '0')}`;
+                };
+
+                document.getElementById('planPeriod').textContent = `${formatDate(start)} ~ ${formatDate(end)}`;
+
+                const daysLeft = Math.ceil((end - today) / (1000 * 60 * 60 * 24));
+                document.getElementById('planDaysLeft').textContent = daysLeft > 0 ? daysLeft : 0;
+            } else {
+                document.getElementById('planPeriod').textContent = '-';
+                document.getElementById('planDaysLeft').textContent = '-';
+            }
+        }
+
+        // Load dashboard data
+        async function loadDashboardData() {
+            const orgName = currentOrg.OrgName;
+
+            try {
+                // Build filter formulas
+                const specialistStatusFilter = SPECIALIST_STATUS_FILTER.map(s => `{Status} = '${s}'`).join(', ');
+                const specialistFormula = `AND({OrgName} = '${orgName}', OR(${specialistStatusFilter}))`;
+
+                const checkupStatusFilter = CHECKUP_STATUS_FILTER.map(s => `{Status} = '${s}'`).join(', ');
+                const checkupFormula = `AND({OrgName} = '${orgName}', OR(${checkupStatusFilter}))`;
+
+                // Fetch data
+                const [specialistRecords, checkupRecords] = await Promise.all([
+                    fetchAllRecords(AIRTABLE_CONFIG.tables.specialist, specialistFormula),
+                    fetchAllRecords(AIRTABLE_CONFIG.tables.checkup, checkupFormula)
+                ]);
+
+                // Update stats
+                updateStats(specialistRecords, checkupRecords);
+
+                // Render tables
+                renderSpecialistTable(specialistRecords);
+                renderCheckupTable(checkupRecords);
+
+            } catch (error) {
+                console.error('Error loading data:', error);
+            }
+        }
+
+        // Update statistics
+        function updateStats(specialistRecords, checkupRecords) {
+            // Total counts
+            document.getElementById('specialistCount').textContent = specialistRecords.length;
+            document.getElementById('checkupCount').textContent = checkupRecords.length;
+
+            // Total savings
+            const totalSavings = checkupRecords.reduce((sum, record) => {
+                return sum + (record.fields.Savings || 0);
+            }, 0);
+            document.getElementById('totalSavings').innerHTML = formatNumber(totalSavings) + '<span class="stat-unit">원</span>';
+
+            // Status counts (combined)
+            const allRecords = [...specialistRecords, ...checkupRecords];
+            
+            const progressCount = allRecords.filter(r => r.fields.Status === '진행중').length;
+            const bookedCount = allRecords.filter(r => r.fields.Status === '예약완료').length;
+            const doneCount = allRecords.filter(r => 
+                ['진료완료', '비예약 완료', '검진완료'].includes(r.fields.Status)
+            ).length;
+
+            document.getElementById('statusProgress').textContent = progressCount;
+            document.getElementById('statusBooked').textContent = bookedCount;
+            document.getElementById('statusDone').textContent = doneCount;
+        }
+
+        // Render specialist table
+        function renderSpecialistTable(records) {
+            const container = document.getElementById('specialistTable');
+            const loading = document.getElementById('specialistLoading');
+
+            if (records.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">📋</div>
+                        <p class="empty-state-text">명의예약 이용 내역이 없습니다.</p>
+                    </div>
+                `;
+            } else {
+                // Sort by date descending
+                records.sort((a, b) => new Date(b.fields.SubmittedAt) - new Date(a.fields.SubmittedAt));
+
+                let tableHtml = `
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>신청일</th>
+                                <th>환자명</th>
+                                <th>관계</th>
+                                <th>질환명</th>
+                                <th>상태</th>
+                                <th>예약병원</th>
+                                <th>예약일시</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                `;
+
+                records.forEach(record => {
+                    const f = record.fields;
+                    tableHtml += `
+                        <tr>
+                            <td>${formatDate(f.SubmittedAt)}</td>
+                            <td>${f.Patient || '-'}</td>
+                            <td>${f.MemberPatientRelation || '-'}</td>
+                            <td>${f.DiseaseName || '-'}</td>
+                            <td>${renderStatusBadge(f.Status)}</td>
+                            <td>${f.Hospital1 || '-'}</td>
+                            <td>${formatDateTime(f.Appoinment1)}</td>
+                        </tr>
+                    `;
+                });
+
+                tableHtml += '</tbody></table>';
+                container.innerHTML = tableHtml;
+            }
+
+            loading.style.display = 'none';
+            container.style.display = 'block';
+        }
+
+        // Render checkup table
+        function renderCheckupTable(records) {
+            const container = document.getElementById('checkupTable');
+            const loading = document.getElementById('checkupLoading');
+
+            if (records.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">📋</div>
+                        <p class="empty-state-text">건강검진 이용 내역이 없습니다.</p>
+                    </div>
+                `;
+            } else {
+                // Sort by date descending
+                records.sort((a, b) => new Date(b.fields.SubmittedAt) - new Date(a.fields.SubmittedAt));
+
+                let tableHtml = `
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>신청일</th>
+                                <th>수검자명</th>
+                                <th>관계</th>
+                                <th>검진센터</th>
+                                <th>프로그램</th>
+                                <th>검진일</th>
+                                <th>상태</th>
+                                <th>개인부담금</th>
+                                <th>절감액</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                `;
+
+                records.forEach(record => {
+                    const f = record.fields;
+                    tableHtml += `
+                        <tr>
+                            <td>${formatDate(f.SubmittedAt)}</td>
+                            <td>${f.Patient || '-'}</td>
+                            <td>${f.MemberPatientRelation || '-'}</td>
+                            <td>${f.Hospital || '-'}</td>
+                            <td>${f.Program || '-'}</td>
+                            <td>${formatDate(f.CheckupDate)}</td>
+                            <td>${renderStatusBadge(f.Status)}</td>
+                            <td>${formatNumber(f.PersonalNetPrice)}원</td>
+                            <td>${formatNumber(f.Savings)}원</td>
+                        </tr>
+                    `;
+                });
+
+                tableHtml += '</tbody></table>';
+                container.innerHTML = tableHtml;
+            }
+
+            loading.style.display = 'none';
+            container.style.display = 'block';
+        }
+
+        // Tab switcher
+        function switchTab(tabName) {
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.classList.toggle('active', tab.dataset.tab === tabName);
+            });
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.toggle('active', content.id === tabName + 'Tab');
+            });
+        }
+
+        // Helper functions
+        function formatDate(dateStr) {
+            if (!dateStr) return '-';
+            const date = new Date(dateStr);
+            return `${date.getFullYear()}.${String(date.getMonth() + 1).padStart(2, '0')}.${String(date.getDate()).padStart(2, '0')}`;
+        }
+
+        function formatDateTime(dateStr) {
+            if (!dateStr) return '-';
+            const date = new Date(dateStr);
+            return `${date.getFullYear()}.${String(date.getMonth() + 1).padStart(2, '0')}.${String(date.getDate()).padStart(2, '0')} ${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}`;
+        }
+
+        function formatNumber(num) {
+            if (num === null || num === undefined) return '-';
+            return new Intl.NumberFormat('ko-KR').format(num);
+        }
+
+        function renderStatusBadge(status) {
+            if (!status) return '-';
+            
+            let className = '';
+            if (status === '진행중') className = 'progress';
+            else if (status === '예약완료') className = 'booked';
+            else className = 'done';
+
+            return `<span class="status-badge ${className}">${status}</span>`;
+        }
+
+        // Check for existing session on load
+        window.addEventListener('DOMContentLoaded', () => {
+            const savedOrg = sessionStorage.getItem('orgData');
+            if (savedOrg) {
+                currentOrg = JSON.parse(savedOrg);
+                showDashboard();
+            }
+
+            // Enter key for login
+            document.getElementById('accessCode').addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') handleLogin();
+            });
+        });
+    </script>
+</body>
+</html>
