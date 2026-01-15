@@ -720,7 +720,7 @@
 
         // Airtable API helper (Vercel API Route 통해 호출)
         async function airtableFetch(tableId, params = {}) {
-            const url = new URL('/api/airtable', window.location.origin);
+            const url = new URL('/api/data', window.location.origin);
             url.searchParams.append('action', 'fetch');
             url.searchParams.append('tableId', tableId);
             
