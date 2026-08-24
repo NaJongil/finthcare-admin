@@ -90,15 +90,20 @@ function specialistRow(f) {
 }
 
 /**
- * 건강검진 행. 대상자 관리·정산 목적이라 이름을 마스킹하지 않는다.
+ * 건강검진 행.
+ *
+ * 일반기업은 담당자가 임직원 대상자를 관리·정산해야 하므로 실명을 남긴다.
+ * GA(보험판매조직·영업중심조직)는 수검자가 설계사의 고객일 수 있어 그 논리가
+ * 성립하지 않으므로 명의예약과 같게 마스킹한다.
  */
-function checkupRow(f) {
+function checkupRow(f, maskNames) {
+    const name = (v) => (maskNames ? maskName(v) : v || '–');
     const center = [f.Hospital, f.HospitalBranch].filter(Boolean).join(' ');
 
     return {
         submitted: formatDate(f.SubmittedAt),
-        user: f.RelatedMember || '–',
-        patient: f.PatientName || '–',
+        user: name(f.RelatedMember),
+        patient: name(f.PatientName),
         relation: f.MemberPatientRelation || '–',
         center: center || '–',
         program: f.Program || '–',
@@ -111,17 +116,18 @@ function checkupRow(f) {
 
 /**
  * 조회된 원본 레코드를 대시보드 응답으로 가공한다.
- * @param orgName 화면에 표시할 기업명 (지점명 포함)
+ * @param orgName 화면에 표시할 조직명 (지점명 포함)
  * @param month 'all' 또는 '2026-07'
+ * @param maskCheckupNames GA 여부. true면 검진 이름도 마스킹한다
  */
-export function buildReport(orgName, specialistRecords, checkupRecords, month) {
+export function buildReport(orgName, specialistRecords, checkupRecords, month, maskCheckupNames) {
     // 레코드는 이 지점의 OrgList 링크에서 나온 ID로만 조회했으므로 소속이 이미 확정이다.
     const specialist = specialistRecords
         .map((r) => specialistRow(r.fields))
         .filter((row) => row.status !== null);
 
     const checkup = checkupRecords
-        .map((r) => checkupRow(r.fields))
+        .map((r) => checkupRow(r.fields, maskCheckupNames))
         .filter((row) => row.status !== null);
 
     const all = [...specialist, ...checkup];
@@ -141,6 +147,7 @@ export function buildReport(orgName, specialistRecords, checkupRecords, month) {
     return {
         orgName,
         month,
+        namesMasked: Boolean(maskCheckupNames),
         availableMonths,
         summary: {
             total: all.length,

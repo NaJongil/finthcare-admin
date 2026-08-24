@@ -187,7 +187,7 @@ function renderSpecialist() {
                     ${badge(r.status)}
                 </div>
                 <dl>
-                    <dt>사용자</dt><dd>${esc(r.user)}</dd>
+                    <dt>신청자</dt><dd>${esc(r.user)}</dd>
                     <dt>환자</dt><dd>${esc(r.patient)} (${esc(r.relation)})</dd>
                     <dt>질환</dt><dd>${esc(r.disease)}</dd>
                     <dt>예약병원</dt><dd>${esc(r.hospital)} ${esc(r.department)}</dd>
@@ -206,7 +206,7 @@ function renderSpecialist() {
             <table>
                 <thead>
                     <tr>
-                        <th>신청일</th><th>사용자</th><th>환자</th><th>관계</th><th>질환</th>
+                        <th>신청일</th><th>신청자</th><th>환자</th><th>관계</th><th>질환</th>
                         <th>상태</th><th>예약병원</th><th>진료과</th><th>의료진</th><th>대기</th><th>진료일</th>
                     </tr>
                 </thead>
@@ -264,7 +264,7 @@ function renderCheckup() {
                     ${badge(r.status)}
                 </div>
                 <dl>
-                    <dt>사용자</dt><dd>${esc(r.user)}</dd>
+                    <dt>신청자</dt><dd>${esc(r.user)}</dd>
                     <dt>수검자</dt><dd>${esc(r.patient)} (${esc(r.relation)})</dd>
                     <dt>검진센터</dt><dd>${esc(r.center)}</dd>
                     <dt>프로그램</dt><dd>${esc(r.program)}</dd>
@@ -279,7 +279,7 @@ function renderCheckup() {
             <table>
                 <thead>
                     <tr>
-                        <th>신청일</th><th>사용자</th><th>수검자</th><th>관계</th><th>검진센터</th>
+                        <th>신청일</th><th>신청자</th><th>수검자</th><th>관계</th><th>검진센터</th>
                         <th>프로그램</th><th>검진일</th><th>상태</th><th>결제금액</th>
                     </tr>
                 </thead>

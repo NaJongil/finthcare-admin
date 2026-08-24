@@ -18,7 +18,11 @@ const CHECKUP_FIELDS = [
     'TotalPrice', '월별',
 ];
 
-const ORG_FIELDS = ['OrgName', 'BranchName', 'RequestSpecialist', 'RequestCheckup'];
+const ORG_FIELDS = ['OrgName', 'BranchName', 'OrgCategory', 'RequestSpecialist', 'RequestCheckup'];
+
+// GA는 수검자가 설계사의 고객일 수 있어 검진 이름도 마스킹한다.
+// 일반기업은 담당자의 대상자 관리·정산을 위해 실명을 남긴다.
+const MASK_CHECKUP_NAMES = new Set(['보험판매조직', '영업중심조직']);
 
 const linkedIds = (value) => (Array.isArray(value) ? value : []);
 
@@ -55,7 +59,9 @@ export default async function handler(req, res) {
         const label = [org.fields.OrgName, org.fields.BranchName].filter(Boolean).join(' ');
 
         res.setHeader('Cache-Control', 'no-store');
-        return res.status(200).json(buildReport(label, specialist, checkup, month));
+        const maskNames = MASK_CHECKUP_NAMES.has(org.fields.OrgCategory);
+
+        return res.status(200).json(buildReport(label, specialist, checkup, month, maskNames));
     } catch (err) {
         console.error('report failed:', err.message);
         return res.status(500).json({ error: '데이터를 불러오지 못했습니다.' });
