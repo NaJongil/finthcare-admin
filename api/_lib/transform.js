@@ -65,8 +65,6 @@ function truncate(text, max) {
     return t.length > max ? t.slice(0, max) + '…' : t;
 }
 
-const orgOf = (f) => f['OrgName (from OrgName)'] || [];
-
 /**
  * 명의예약 행. 사용자·환자·의료진 전부 마스킹하고 원본은 버린다.
  */
@@ -113,19 +111,16 @@ function checkupRow(f) {
 
 /**
  * 조회된 원본 레코드를 대시보드 응답으로 가공한다.
+ * @param orgName 화면에 표시할 기업명 (지점명 포함)
  * @param month 'all' 또는 '2026-07'
  */
 export function buildReport(orgName, specialistRecords, checkupRecords, month) {
-    // orgName 재확인 — formula를 통과한 레코드라도 소속을 다시 검증한다.
-    const mine = (r) => orgOf(r.fields).includes(orgName);
-
+    // 레코드는 이 지점의 OrgList 링크에서 나온 ID로만 조회했으므로 소속이 이미 확정이다.
     const specialist = specialistRecords
-        .filter(mine)
         .map((r) => specialistRow(r.fields))
         .filter((row) => row.status !== null);
 
     const checkup = checkupRecords
-        .filter(mine)
         .map((r) => checkupRow(r.fields))
         .filter((row) => row.status !== null);
 

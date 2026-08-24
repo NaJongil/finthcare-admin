@@ -16,8 +16,8 @@ function sign(body) {
     return crypto.createHmac('sha256', secret()).update(body).digest('base64url');
 }
 
-export function issueToken(orgName) {
-    const body = b64url(JSON.stringify({ org: orgName, exp: Date.now() + TTL_MS }));
+export function issueToken(orgId) {
+    const body = b64url(JSON.stringify({ orgId, exp: Date.now() + TTL_MS }));
     return `${body}.${sign(body)}`;
 }
 
@@ -38,7 +38,7 @@ export function verifyToken(token) {
     } catch {
         return null;
     }
-    if (!payload || typeof payload.org !== 'string') return null;
+    if (!payload || typeof payload.orgId !== 'string') return null;
     if (!Number.isFinite(payload.exp) || payload.exp < Date.now()) return null;
     return payload;
 }

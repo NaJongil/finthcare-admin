@@ -43,3 +43,33 @@ export async function fetchAll(tableId, formula, fields) {
 
     return records;
 }
+
+/** 레코드 ID로 단건 조회. */
+export async function fetchRecord(tableId, recordId, fields) {
+    const apiKey = process.env.AIRTABLE_API_KEY;
+    if (!apiKey) throw new Error('AIRTABLE_API_KEY not configured');
+
+    const url = new URL(`https://api.airtable.com/v0/${BASE_ID}/${tableId}/${recordId}`);
+    for (const f of fields || []) url.searchParams.append('fields[]', f);
+
+    const res = await fetch(url.toString(), { headers: { Authorization: `Bearer ${apiKey}` } });
+    if (res.status === 404) return null;
+    if (!res.ok) throw new Error(`Airtable ${res.status}: ${await res.text()}`);
+    return res.json();
+}
+
+/**
+ * 레코드 ID 목록으로 조회한다. formula 길이 제한이 있어 50개씩 끊는다.
+ * 기업명이 아니라 ID로 좁히므로 같은 기업명의 다른 지점이 섞이지 않는다.
+ */
+export async function fetchByIds(tableId, ids, fields) {
+    const chunks = [];
+    for (let i = 0; i < ids.length; i += 50) chunks.push(ids.slice(i, i + 50));
+
+    const pages = await Promise.all(
+        chunks.map((chunk) =>
+            fetchAll(tableId, `OR(${chunk.map((id) => `RECORD_ID()=${quote(id)}`).join(',')})`, fields)
+        )
+    );
+    return pages.flat();
+}

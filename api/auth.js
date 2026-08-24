@@ -52,16 +52,17 @@ export default async function handler(req, res) {
             return res.status(401).json({ error: '접속 코드가 올바르지 않습니다.' });
         }
 
-        const orgName = records[0].fields.OrgName;
-        if (!orgName) {
+        const org = records[0];
+        if (!org.fields.OrgName) {
             return res.status(401).json({ error: '접속 코드가 올바르지 않습니다.' });
         }
 
-        // AccessCode, record.id는 응답에 담지 않는다.
+        // 같은 기업명이 지점별로 여러 레코드에 나뉘어 있어(신한라이프 11개 등)
+        // 기업명으로는 지점을 구분할 수 없다. 토큰에는 OrgList 레코드 ID를 담는다.
         return res.status(200).json({
-            token: issueToken(orgName),
-            orgName,
-            branchName: records[0].fields.BranchName || null,
+            token: issueToken(org.id),
+            orgName: org.fields.OrgName,
+            branchName: org.fields.BranchName || null,
         });
     } catch (err) {
         console.error('auth failed:', err.message);
