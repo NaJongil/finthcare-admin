@@ -1,6 +1,6 @@
 // 라이브러리 없이 node crypto만으로 만든 세션 토큰.
 // payload를 base64url로 담고 HMAC-SHA256 서명을 붙인다.
-import crypto from 'crypto';
+import crypto from 'node:crypto';
 
 const TTL_MS = 12 * 60 * 60 * 1000; // 12시간
 

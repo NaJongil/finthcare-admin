@@ -1,6 +1,7 @@
 // GET /api/report?month=2026-07|all   Authorization: Bearer <token>
 import { TABLES, fetchRecord, fetchByIds } from './_lib/airtable.js';
 import { authenticate } from './_lib/token.js';
+import { configError } from './_lib/config.js';
 import { buildReport } from './_lib/transform.js';
 
 const MONTH = /^\d{4}-\d{2}$/;
@@ -30,6 +31,8 @@ export default async function handler(req, res) {
     if (req.method !== 'GET') {
         return res.status(405).json({ error: 'Method not allowed' });
     }
+
+    if (configError(res)) return;
 
     const session = authenticate(req);
     if (!session) {

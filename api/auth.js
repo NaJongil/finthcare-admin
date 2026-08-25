@@ -1,6 +1,7 @@
 // POST /api/auth  { accessCode } -> { token, orgName }
 import { TABLES, fetchAll, quote } from './_lib/airtable.js';
 import { issueToken } from './_lib/token.js';
+import { configError } from './_lib/config.js';
 
 // AccessCode는 RIGHT(RECORD_ID(), 8) 수식이라 항상 영숫자다.
 // 형식을 좁게 검증해 formula injection 자체를 성립하지 않게 만든다.
@@ -30,6 +31,8 @@ export default async function handler(req, res) {
     if (req.method !== 'POST') {
         return res.status(405).json({ error: 'Method not allowed' });
     }
+
+    if (configError(res)) return;
 
     const ip = (req.headers['x-forwarded-for'] || '').split(',')[0].trim() || 'unknown';
     if (rateLimited(ip)) {
