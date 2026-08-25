@@ -44,18 +44,16 @@ export async function fetchAll(tableId, formula, fields) {
     return records;
 }
 
-/** 레코드 ID로 단건 조회. */
+/**
+ * 레코드 ID로 단건 조회.
+ *
+ * Airtable의 단건 조회 엔드포인트(GET .../{recordId})는 fields[] 파라미터를
+ * 받지 않아 422 INVALID_REQUEST_UNKNOWN을 낸다. 목록 엔드포인트에
+ * RECORD_ID() 필터를 걸어 필드 선택을 유지한다.
+ */
 export async function fetchRecord(tableId, recordId, fields) {
-    const apiKey = process.env.AIRTABLE_API_KEY;
-    if (!apiKey) throw new Error('AIRTABLE_API_KEY not configured');
-
-    const url = new URL(`https://api.airtable.com/v0/${BASE_ID}/${tableId}/${recordId}`);
-    for (const f of fields || []) url.searchParams.append('fields[]', f);
-
-    const res = await fetch(url.toString(), { headers: { Authorization: `Bearer ${apiKey}` } });
-    if (res.status === 404) return null;
-    if (!res.ok) throw new Error(`Airtable ${res.status}: ${await res.text()}`);
-    return res.json();
+    const [record] = await fetchAll(tableId, `RECORD_ID()=${quote(recordId)}`, fields);
+    return record || null;
 }
 
 /**
