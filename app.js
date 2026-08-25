@@ -1,4 +1,4 @@
-// 핀스케어 기업 대시보드
+// 핀스케어 이용 현황 대시보드
 // 서버가 이미 매핑·익명화·집계를 끝낸 JSON만 받는다. 이 파일은 그리기만 한다.
 
 const TOKEN_KEY = 'fc.token';
@@ -33,16 +33,6 @@ const getToken = () => sessionStorage.getItem(TOKEN_KEY);
 function endSession() {
     sessionStorage.removeItem(TOKEN_KEY);
     location.reload();
-}
-
-async function api(path) {
-    const res = await fetch(path, { headers: { Authorization: `Bearer ${getToken()}` } });
-    if (res.status === 401) {
-        endSession();
-        throw new Error('세션이 만료되었습니다.');
-    }
-    if (!res.ok) throw new Error((await res.json().catch(() => ({}))).error || '요청에 실패했습니다.');
-    return res.json();
 }
 
 /* ── 로그인 ───────────────────────────────────────────── */
@@ -85,39 +75,30 @@ $('logoutBtn').addEventListener('click', endSession);
 
 /* ── 대시보드 ─────────────────────────────────────────── */
 
-async function openDashboard(month = 'all') {
-    report = await api(`/api/report?month=${encodeURIComponent(month)}`);
+async function openDashboard() {
+    const res = await fetch('/api/report', {
+        headers: { Authorization: `Bearer ${getToken()}` },
+    });
+    if (res.status === 401) {
+        endSession();
+        throw new Error('세션이 만료되었습니다.');
+    }
+    if (!res.ok) {
+        throw new Error((await res.json().catch(() => ({}))).error || '요청에 실패했습니다.');
+    }
+    report = await res.json();
 
     $('loginScreen').hidden = true;
     $('dashboard').hidden = false;
     $('orgName').textContent = report.orgName;
 
-    renderMonthSelect();
     renderSummary();
     renderSpecialist();
     renderCheckup();
 }
 
-function renderMonthSelect() {
-    const select = $('monthSelect');
-    const options = ['all', ...report.availableMonths];
-
-    select.innerHTML = options
-        .map((m) => `<option value="${esc(m)}">${m === 'all' ? '전체 누적' : esc(m)}</option>`)
-        .join('');
-    select.value = report.month;
-}
-
-$('monthSelect').addEventListener('change', async (e) => {
-    shown.specialist = PAGE_SIZE;
-    shown.checkup = PAGE_SIZE;
-    await openDashboard(e.target.value);
-});
-
 function renderSummary() {
     const s = report.summary;
-    const isAll = report.month === 'all';
-    const monthLabel = isAll ? '이번 선택 기간' : report.month;
 
     const counts = Object.entries(s.statusCounts)
         .map(([status, n]) => `<span class="badge ${BADGE_CLASS[status] || 'badge--consult'}">${esc(status)}<b>${n}</b></span>`)
@@ -126,7 +107,6 @@ function renderSummary() {
     $('summary').innerHTML = `
         <div class="summary-label">누적 이용</div>
         <div class="summary-total"><strong>${s.total}</strong><span>건</span></div>
-        ${isAll ? '' : `<div class="summary-month">${esc(monthLabel)} ${s.monthTotal}건</div>`}
         <div class="summary-breakdown">
             <span>명의예약 <b>${s.specialistTotal}건</b></span>
             <span>건강검진 <b>${s.checkupTotal}건</b></span>
@@ -144,7 +124,7 @@ function renderSpecialist() {
     const box = $('specialistBody');
 
     if (!rows.length) {
-        box.innerHTML = '<div class="empty-state">해당 기간에 명의예약 이용 내역이 없습니다.</div>';
+        box.innerHTML = '<div class="empty-state">아직 명의예약 이용 내역이 없습니다.</div>';
         return;
     }
 
@@ -224,20 +204,13 @@ function renderSpecialist() {
 
 function renderCheckup() {
     const rows = report.checkup;
-    const section = $('checkupSection');
 
     // 검진 데이터가 아예 없는 기업에는 섹션을 노출하지 않는다.
-    if (!report.summary.checkupTotal) {
-        section.hidden = true;
-        return;
-    }
-    section.hidden = false;
-
-    const box = $('checkupBody');
     if (!rows.length) {
-        box.innerHTML = '<div class="empty-state">해당 기간에 건강검진 이용 내역이 없습니다.</div>';
+        $('checkupSection').hidden = true;
         return;
     }
+    $('checkupSection').hidden = false;
 
     const visible = rows.slice(0, shown.checkup);
 
@@ -274,7 +247,7 @@ function renderCheckup() {
             </div>`)
         .join('');
 
-    box.innerHTML = `
+    $('checkupBody').innerHTML = `
         <div class="table-wrap">
             <table>
                 <thead>
@@ -318,14 +291,8 @@ document.addEventListener('click', (e) => {
     }
 });
 
-/* ── 후기 롤링 ────────────────────────────────────────── */
-
-const carousel = {
-    items: [],
-    index: 0,
-    timer: null,
-    drag: null,
-};
+/* ── 후기 ─────────────────────────────────────────────── */
+// 롤링·드래그·모달은 CSS scroll-snap으로 대체했다. 여기서는 카드만 찍는다.
 
 async function initFeedbacks() {
     let items = [];
@@ -337,10 +304,7 @@ async function initFeedbacks() {
     }
     if (!Array.isArray(items) || !items.length) return;
 
-    carousel.items = items;
-    $('feedbackSection').hidden = false;
-
-    $('feedbackTrack').innerHTML = items
+    $('feedbackRow').innerHTML = items
         .map((f) => `
             <article class="feedback-card">
                 <p class="feedback-headline">${esc(f.headline)}</p>
@@ -349,91 +313,8 @@ async function initFeedbacks() {
             </article>`)
         .join('');
 
-    $('feedbackModalList').innerHTML = items
-        .map((f) => `
-            <article>
-                <p class="feedback-headline">${esc(f.headline)}</p>
-                <p class="feedback-body" style="-webkit-line-clamp:none">${esc(f.body)}</p>
-                ${f.userType ? `<p class="feedback-type">${esc(f.userType)}</p>` : ''}
-            </article>`)
-        .join('');
-
-    bindCarousel();
-    startAutoRoll();
+    $('feedbackSection').hidden = false;
 }
-
-function step() {
-    const card = $('feedbackTrack').firstElementChild;
-    if (!card) return 0;
-    const gap = parseFloat(getComputedStyle($('feedbackTrack')).gap) || 0;
-    return card.offsetWidth + gap;
-}
-
-function perView() {
-    const s = step();
-    return s ? Math.max(1, Math.round($('feedbackViewport').offsetWidth / s)) : 1;
-}
-
-const maxIndex = () => Math.max(0, carousel.items.length - perView());
-
-function goTo(index, animate = true) {
-    carousel.index = Math.min(Math.max(index, 0), maxIndex());
-    const track = $('feedbackTrack');
-    track.classList.toggle('is-dragging', !animate);
-    track.style.transform = `translateX(${-carousel.index * step()}px)`;
-}
-
-function startAutoRoll() {
-    clearInterval(carousel.timer);
-    carousel.timer = setInterval(() => {
-        goTo(carousel.index >= maxIndex() ? 0 : carousel.index + 1);
-    }, 5000);
-}
-
-function bindCarousel() {
-    const viewport = $('feedbackViewport');
-    const track = $('feedbackTrack');
-
-    viewport.addEventListener('pointerdown', (e) => {
-        clearInterval(carousel.timer);
-        carousel.drag = { startX: e.clientX, base: carousel.index * step() };
-        viewport.classList.add('is-dragging');
-        track.classList.add('is-dragging');
-        viewport.setPointerCapture(e.pointerId);
-    });
-
-    viewport.addEventListener('pointermove', (e) => {
-        if (!carousel.drag) return;
-        const offset = carousel.drag.base - (e.clientX - carousel.drag.startX);
-        track.style.transform = `translateX(${-offset}px)`;
-    });
-
-    const endDrag = (e) => {
-        if (!carousel.drag) return;
-        const moved = e.clientX - carousel.drag.startX;
-        carousel.drag = null;
-        viewport.classList.remove('is-dragging');
-        track.classList.remove('is-dragging');
-
-        const threshold = step() / 4;
-        if (moved < -threshold) goTo(carousel.index + 1);
-        else if (moved > threshold) goTo(carousel.index - 1);
-        else goTo(carousel.index);
-
-        startAutoRoll();
-    };
-
-    viewport.addEventListener('pointerup', endDrag);
-    viewport.addEventListener('pointercancel', endDrag);
-
-    window.addEventListener('resize', () => goTo(carousel.index, false));
-}
-
-$('feedbackMoreBtn').addEventListener('click', () => { $('feedbackModal').hidden = false; });
-$('feedbackModalClose').addEventListener('click', () => { $('feedbackModal').hidden = true; });
-$('feedbackModal').addEventListener('click', (e) => {
-    if (e.target === $('feedbackModal')) $('feedbackModal').hidden = true;
-});
 
 /* ── 시작 ─────────────────────────────────────────────── */
 
