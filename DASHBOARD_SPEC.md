@@ -204,6 +204,14 @@ api/auth.js  api/report.js
 api/_lib/{airtable,token,transform,config}.js   ← _ 접두사라 Vercel이 함수로 만들지 않음
 ```
 
+### 정적 파일 캐시 — `?v=` 를 올린다
+
+`admin.finth.care`는 Cloudflare를 거치고, Cloudflare가 `.js`·`.css`에 브라우저 캐시 4시간(`max-age=14400`)을 덮어쓴다. Vercel 원본은 `max-age=0`을 보내지만 무시된다. `index.html`만 매번 새로 받으므로, 파일명이 그대로면 **새 HTML + 옛 JS** 조합이 생겨 화면이 통째로 죽는다 (2026-11-12 월 선택기 제거 직후 실제 발생).
+
+→ `app.js`·`styles.css`를 수정하면 `index.html`의 `?v=` 값을 올린다 (날짜 `YYYYMMDD` 권장).
+
+Cloudflare 대시보드에서 Caching → Browser Cache TTL을 **Respect Existing Headers**로 바꾸면 이 규칙이 필요 없어진다.
+
 **환경변수** (Production·Preview 양쪽 필요, 추가 후 재배포해야 반영)
 
 | 이름 | 비고 |

@@ -5,7 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="robots" content="noindex, nofollow">
     <title>핀스케어 이용 현황 대시보드</title>
-    <link rel="stylesheet" href="/styles.css">
+    <!-- 정적 파일명이 고정이라 Cloudflare가 4시간 캐시한다. JS·CSS를 바꾸면 v 값을 올려야
+         새 HTML과 옛 JS가 섞여 화면이 통째로 죽는 일을 막는다. -->
+    <link rel="stylesheet" href="/styles.css?v=20261112">
 </head>
 <body>
 
@@ -78,6 +80,6 @@
     </footer>
 </div>
 
-<script src="/app.js" type="module"></script>
+<script src="/app.js?v=20261112" type="module"></script>
 </body>
 </html>

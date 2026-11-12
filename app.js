@@ -320,6 +320,13 @@ async function initFeedbacks() {
 
 initFeedbacks();
 
+// 저장된 토큰으로 바로 복귀. 실패를 조용히 삼키면 로그인 화면만 덩그러니 남아
+// 원인을 알 수 없으므로, 토큰을 버리되 사유는 화면에 드러낸다.
 if (getToken()) {
-    openDashboard().catch(() => sessionStorage.removeItem(TOKEN_KEY));
+    openDashboard().catch((err) => {
+        sessionStorage.removeItem(TOKEN_KEY);
+        const error = $('loginError');
+        error.textContent = err.message;
+        error.hidden = false;
+    });
 }
