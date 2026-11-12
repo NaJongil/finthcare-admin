@@ -43,9 +43,6 @@
             <div class="wordmark">FinthCare</div>
             <div class="header-divider"></div>
             <span class="org-name" id="orgName"></span>
-
-            <label class="sr-only" for="monthSelect" hidden>기간 선택</label>
-            <select class="month-select" id="monthSelect"></select>
             <button type="button" class="btn-ghost" id="logoutBtn">로그아웃</button>
         </div>
     </header>
@@ -54,13 +51,10 @@
         <!-- 요약 -->
         <section class="summary" id="summary" aria-live="polite"></section>
 
-        <!-- 후기 -->
+        <!-- 후기 : 가로 스크롤 -->
         <section id="feedbackSection" hidden>
             <h2 class="section-title">이용 후기</h2>
-            <div class="feedback-viewport" id="feedbackViewport">
-                <div class="feedback-track" id="feedbackTrack"></div>
-            </div>
-            <button type="button" class="feedback-more" id="feedbackMoreBtn">후기 더 보기</button>
+            <div class="feedback-row" id="feedbackRow"></div>
         </section>
 
         <!-- 명의예약 -->
@@ -82,17 +76,6 @@
             <span>이용 방법 안내는 담당 매니저에게 요청하세요.</span>
         </div>
     </footer>
-</div>
-
-<!-- 후기 전체 목록 -->
-<div class="modal" id="feedbackModal" hidden>
-    <div class="modal-panel" role="dialog" aria-modal="true" aria-labelledby="feedbackModalTitle">
-        <div class="modal-head">
-            <h3 id="feedbackModalTitle">이용 후기</h3>
-            <button type="button" class="btn-ghost" id="feedbackModalClose">닫기</button>
-        </div>
-        <div class="modal-list" id="feedbackModalList"></div>
-    </div>
 </div>
 
 <script src="/app.js" type="module"></script>

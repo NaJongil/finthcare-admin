@@ -1,9 +1,5 @@
 {
   "name": "finthcare-admin",
   "private": true,
-  "type": "module",
-  "scripts": {
-    "feedbacks:fetch": "node scripts/feedbacks-fetch.js",
-    "feedbacks:build": "node scripts/feedbacks-build.js"
-  }
+  "type": "module"
 }

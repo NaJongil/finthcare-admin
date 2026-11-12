@@ -1,5 +1,4 @@
-// generate_report.py의 상태 매핑·익명화·집계 규칙 이식.
-// 이 파일을 거친 값만 클라이언트로 나간다.
+// 상태 매핑·익명화·집계. 이 파일을 거친 값만 클라이언트로 나간다.
 
 const EXCLUDED = new Set(['취소', '테스트/기타']);
 
@@ -65,9 +64,7 @@ function truncate(text, max) {
     return t.length > max ? t.slice(0, max) + '…' : t;
 }
 
-/**
- * 명의예약 행. 사용자·환자·의료진 전부 마스킹하고 원본은 버린다.
- */
+/** 명의예약 행. 질환 정보가 함께 나가므로 사람 이름은 전부 마스킹한다. */
 function specialistRow(f) {
     const known = [f.Specialist1, f.Specialist2, f.Specialist3].filter(Boolean);
     const wait = f.WaitingTime;
@@ -85,78 +82,51 @@ function specialistRow(f) {
         waiting: typeof wait === 'number' && wait > 0 ? `${Math.round(wait)}일` : '–',
         appointment: formatDate(f.Appointment1),
         reason: maskDoctorsInText(truncate(f.RecommendReason1, 300), known),
-        month: f['월별'] || null,
     };
 }
 
 /**
- * 건강검진 행.
- *
- * 일반기업은 담당자가 임직원 대상자를 관리·정산해야 하므로 실명을 남긴다.
- * GA(보험판매조직·영업중심조직)는 수검자가 설계사의 고객일 수 있어 그 논리가
- * 성립하지 않으므로 명의예약과 같게 마스킹한다.
+ * 건강검진 행. 담당자가 임직원 대상자를 관리·정산해야 하므로 실명을 남긴다.
+ * 이 논리가 성립하지 않는 판매조직 계열은 /api/auth에서 로그인 자체를 막는다.
  */
-function checkupRow(f, maskNames) {
-    const name = (v) => (maskNames ? maskName(v) : v || '–');
+function checkupRow(f) {
     const center = [f.Hospital, f.HospitalBranch].filter(Boolean).join(' ');
 
     return {
         submitted: formatDate(f.SubmittedAt),
-        user: name(f.RelatedMember),
-        patient: name(f.PatientName),
+        user: f.RelatedMember || '–',
+        patient: f.PatientName || '–',
         relation: f.MemberPatientRelation || '–',
         center: center || '–',
         program: f.Program || '–',
         checkupDate: formatDate(f.CheckupDate),
         status: mapCheckupStatus(f.Status),
         amount: typeof f.TotalPrice === 'number' ? f.TotalPrice : null,
-        month: f['월별'] || null,
     };
 }
 
 /**
  * 조회된 원본 레코드를 대시보드 응답으로 가공한다.
- * @param orgName 화면에 표시할 조직명 (지점명 포함)
- * @param month 'all' 또는 '2026-07'
- * @param maskCheckupNames GA 여부. true면 검진 이름도 마스킹한다
+ * 레코드는 이 조직의 OrgList 링크에서 나온 ID로만 조회했으므로 소속이 이미 확정이다.
  */
-export function buildReport(orgName, specialistRecords, checkupRecords, month, maskCheckupNames) {
-    // 레코드는 이 지점의 OrgList 링크에서 나온 ID로만 조회했으므로 소속이 이미 확정이다.
-    const specialist = specialistRecords
-        .map((r) => specialistRow(r.fields))
-        .filter((row) => row.status !== null);
-
-    const checkup = checkupRecords
-        .map((r) => checkupRow(r.fields, maskCheckupNames))
-        .filter((row) => row.status !== null);
-
+export function buildReport(orgName, specialistRecords, checkupRecords) {
+    const keep = (row) => row.status !== null;
+    const specialist = specialistRecords.map((r) => specialistRow(r.fields)).filter(keep);
+    const checkup = checkupRecords.map((r) => checkupRow(r.fields)).filter(keep);
     const all = [...specialist, ...checkup];
 
-    const availableMonths = [...new Set(all.map((r) => r.month).filter(Boolean))].sort().reverse();
-
-    const inMonth = (row) => month === 'all' || row.month === month;
-    const specialistRows = specialist.filter(inMonth);
-    const checkupRows = checkup.filter(inMonth);
-
-    const countByStatus = (rows) =>
-        rows.reduce((acc, r) => ({ ...acc, [r.status]: (acc[r.status] || 0) + 1 }), {});
-
-    // 명의예약 최신순. 표시용 YY/MM/DD는 사전순 정렬이 곧 시간순이다.
+    // 표시용 YY/MM/DD는 사전순 정렬이 곧 시간순이다.
     const bySubmittedDesc = (a, b) => b.submitted.localeCompare(a.submitted);
 
     return {
         orgName,
-        month,
-        namesMasked: Boolean(maskCheckupNames),
-        availableMonths,
         summary: {
             total: all.length,
-            monthTotal: specialistRows.length + checkupRows.length,
             specialistTotal: specialist.length,
             checkupTotal: checkup.length,
-            statusCounts: countByStatus(all),
+            statusCounts: all.reduce((acc, r) => ({ ...acc, [r.status]: (acc[r.status] || 0) + 1 }), {}),
         },
-        specialist: [...specialist].sort(bySubmittedDesc),
-        checkup: [...checkup].sort(bySubmittedDesc),
+        specialist: specialist.sort(bySubmittedDesc),
+        checkup: checkup.sort(bySubmittedDesc),
     };
 }

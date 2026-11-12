@@ -1,4 +1,4 @@
-// POST /api/auth  { accessCode } -> { token, orgName }
+// POST /api/auth  { accessCode } -> { token }
 import { TABLES, fetchAll, quote } from './_lib/airtable.js';
 import { issueToken } from './_lib/token.js';
 import { configError } from './_lib/config.js';
@@ -12,6 +12,11 @@ const ACCESS_CODE = /^[A-Za-z0-9]{4,32}$/;
 const WINDOW_MS = 60 * 1000;
 const MAX_ATTEMPTS = 10;
 const attempts = new Map();
+
+// 이 대시보드는 임직원 복리후생 관점의 조직만 대상으로 한다.
+// 판매조직 계열은 수검자가 담당자의 고객일 수 있어 같은 화면을 그대로 쓸 수 없다.
+// (별도 view가 준비되면 그쪽으로 분기한다.)
+const BLOCKED_CATEGORIES = new Set(['보험판매조직', '영업중심조직', '다단계판매조직', '테스트/기타']);
 
 function rateLimited(ip) {
     const now = Date.now();
@@ -48,7 +53,7 @@ export default async function handler(req, res) {
         const records = await fetchAll(
             TABLES.orgList,
             `{AccessCode} = ${quote(accessCode)}`,
-            ['OrgName', 'BranchName']
+            ['OrgName', 'OrgCategory']
         );
 
         if (records.length !== 1) {
@@ -60,13 +65,15 @@ export default async function handler(req, res) {
             return res.status(401).json({ error: '접속 코드가 올바르지 않습니다.' });
         }
 
-        // 같은 기업명이 지점별로 여러 레코드에 나뉘어 있어(신한라이프 11개 등)
-        // 기업명으로는 지점을 구분할 수 없다. 토큰에는 OrgList 레코드 ID를 담는다.
-        return res.status(200).json({
-            token: issueToken(org.id),
-            orgName: org.fields.OrgName,
-            branchName: org.fields.BranchName || null,
-        });
+        if (BLOCKED_CATEGORIES.has(org.fields.OrgCategory)) {
+            return res.status(403).json({
+                error: '이 조직은 아직 대시보드 대상이 아닙니다. 담당 매니저에게 문의해주세요.',
+            });
+        }
+
+        // 같은 기업명이 여러 레코드로 나뉠 수 있어 기업명은 식별자가 되지 못한다.
+        // 토큰에는 OrgList 레코드 ID를 담는다.
+        return res.status(200).json({ token: issueToken(org.id) });
     } catch (err) {
         console.error('auth failed:', err.message);
         return res.status(500).json({ error: '로그인 처리 중 오류가 발생했습니다.' });
