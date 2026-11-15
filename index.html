@@ -7,7 +7,7 @@
     <title>핀스케어 이용 현황 대시보드</title>
     <!-- 정적 파일명이 고정이라 Cloudflare가 4시간 캐시한다. JS·CSS를 바꾸면 v 값을 올려야
          새 HTML과 옛 JS가 섞여 화면이 통째로 죽는 일을 막는다. -->
-    <link rel="stylesheet" href="/styles.css?v=20261112">
+    <link rel="stylesheet" href="/styles.css?v=20261115">
 </head>
 <body>
 
@@ -53,12 +53,6 @@
         <!-- 요약 -->
         <section class="summary" id="summary" aria-live="polite"></section>
 
-        <!-- 후기 : 가로 스크롤 -->
-        <section id="feedbackSection" hidden>
-            <h2 class="section-title">이용 후기</h2>
-            <div class="feedback-row" id="feedbackRow"></div>
-        </section>
-
         <!-- 명의예약 -->
         <section id="specialistSection">
             <h2 class="section-title">명의예약 내역</h2>
@@ -70,6 +64,24 @@
             <h2 class="section-title">건강검진 내역</h2>
             <div id="checkupBody"></div>
         </section>
+
+        <!-- 바로가기 : 후기·콘텐츠는 리포트에 싣지 않고 핀스케어 홈페이지로 보낸다 -->
+        <nav class="link-banners" aria-label="핀스케어 바로가기">
+            <a class="link-banner" href="https://www.finthcare.com/reviews" target="_blank" rel="noopener">
+                <span class="link-banner-text">
+                    <strong>핀스케어 고객 후기</strong>
+                    <span>건강의 갈림길에서 핀스케어를 만난 분들의 목소리</span>
+                </span>
+                <span class="link-banner-arrow" aria-hidden="true">→</span>
+            </a>
+            <a class="link-banner" href="https://www.finthcare.com/blogs" target="_blank" rel="noopener">
+                <span class="link-banner-text">
+                    <strong>블로그 보러가기</strong>
+                    <span>의료 가이드부터 비즈니스 성장을 위한 정보</span>
+                </span>
+                <span class="link-banner-arrow" aria-hidden="true">→</span>
+            </a>
+        </nav>
     </main>
 
     <footer class="footer">
@@ -80,6 +92,6 @@
     </footer>
 </div>
 
-<script src="/app.js?v=20261112" type="module"></script>
+<script src="/app.js?v=20261115" type="module"></script>
 </body>
 </html>

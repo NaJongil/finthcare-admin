@@ -64,14 +64,17 @@ function truncate(text, max) {
     return t.length > max ? t.slice(0, max) + '…' : t;
 }
 
-/** 명의예약 행. 질환 정보가 함께 나가므로 사람 이름은 전부 마스킹한다. */
+/**
+ * 명의예약 행. 질환 정보가 함께 나가므로 환자·의료진 이름은 마스킹한다.
+ * 신청자는 해당 조직 임직원이라 담당자가 식별할 수 있어야 하므로 실명을 남긴다(고객사 요청).
+ */
 function specialistRow(f) {
     const known = [f.Specialist1, f.Specialist2, f.Specialist3].filter(Boolean);
     const wait = f.WaitingTime;
 
     return {
         submitted: formatDate(f.SubmittedAt),
-        user: maskName(f.RelatedMember),
+        user: f.RelatedMember || '–',
         patient: maskName(f.PatientName),
         relation: f.MemberPatientRelation || '–',
         disease: f.DiseaseCategory1 || f.DiseaseName || '–',
