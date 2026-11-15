@@ -316,47 +316,62 @@ body {
     margin-left: 4px;
 }
 
-/* ── 후기 ─────────────────────────────────────────────── */
-/* 자동 롤링 대신 scroll-snap. 터치 스와이프·트랙패드·키보드가 전부 공짜로 따라온다. */
-.feedback-row {
-    display: flex;
+/* ── 바로가기 배너 ────────────────────────────────────── */
+.link-banners {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
     gap: 16px;
-    overflow-x: auto;
-    scroll-snap-type: x mandatory;
-    scrollbar-width: thin;
-    padding-bottom: 8px;
 }
 
-.feedback-card {
-    flex: 0 0 calc((100% - 32px) / 3);
-    scroll-snap-align: start;
-    background: var(--color-card);
-    border: 1px solid var(--color-border);
+.link-banner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 22px 24px;
+    background: var(--color-primary-soft);
+    border: 1px solid var(--color-primary-tint);
     border-radius: var(--radius-md);
-    padding: 20px 22px;
+    color: var(--color-text);
+    text-decoration: none;
+    transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.link-banner:hover {
+    border-color: var(--color-primary);
+    box-shadow: var(--shadow-sm);
+}
+
+.link-banner:focus-visible {
+    outline: 2px solid var(--color-primary-deep);
+    outline-offset: 2px;
+}
+
+.link-banner-text {
     display: flex;
     flex-direction: column;
-    gap: 8px;
+    gap: 4px;
 }
 
-.feedback-headline {
-    font-size: 15px;
+.link-banner-text strong {
+    font-size: 16px;
     font-weight: 700;
-    line-height: 1.45;
 }
 
-.feedback-body {
+.link-banner-text span {
     font-size: 13.5px;
-    line-height: 1.6;
     color: var(--color-text-soft);
 }
 
-.feedback-type {
-    margin-top: auto;
-    font-size: 12px;
-    font-weight: 600;
+.link-banner-arrow {
+    flex-shrink: 0;
+    font-size: 20px;
+    font-weight: 700;
     color: var(--color-primary-deep);
+    transition: transform 0.15s;
 }
+
+.link-banner:hover .link-banner-arrow { transform: translateX(3px); }
 
 /* ── 표 ───────────────────────────────────────────────── */
 .table-wrap {
@@ -459,7 +474,7 @@ tr.reason-row td {
 
 /* ── 반응형 ───────────────────────────────────────────── */
 @media (max-width: 900px) {
-    .feedback-card { flex-basis: calc((100% - 16px) / 2); }
+    .link-banners { grid-template-columns: 1fr; }
 }
 
 @media (max-width: 640px) {
@@ -470,7 +485,7 @@ tr.reason-row td {
     .summary { padding: 24px 20px; }
     .summary-total strong { font-size: 44px; }
 
-    .feedback-card { flex-basis: 100%; }
+    .link-banner { padding: 18px 20px; }
 
     /* 표 → 카드 */
     .table-wrap { display: none; }

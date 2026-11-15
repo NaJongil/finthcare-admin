@@ -291,34 +291,7 @@ document.addEventListener('click', (e) => {
     }
 });
 
-/* ── 후기 ─────────────────────────────────────────────── */
-// 롤링·드래그·모달은 CSS scroll-snap으로 대체했다. 여기서는 카드만 찍는다.
-
-async function initFeedbacks() {
-    let items = [];
-    try {
-        const res = await fetch('/feedbacks.json');
-        if (res.ok) items = await res.json();
-    } catch {
-        // 후기는 부가 정보다. 실패해도 대시보드는 그대로 뜬다.
-    }
-    if (!Array.isArray(items) || !items.length) return;
-
-    $('feedbackRow').innerHTML = items
-        .map((f) => `
-            <article class="feedback-card">
-                <p class="feedback-headline">${esc(f.headline)}</p>
-                <p class="feedback-body">${esc(f.body)}</p>
-                ${f.userType ? `<p class="feedback-type">${esc(f.userType)}</p>` : ''}
-            </article>`)
-        .join('');
-
-    $('feedbackSection').hidden = false;
-}
-
 /* ── 시작 ─────────────────────────────────────────────── */
-
-initFeedbacks();
 
 // 저장된 토큰으로 바로 복귀. 실패를 조용히 삼키면 로그인 화면만 덩그러니 남아
 // 원인을 알 수 없으므로, 토큰을 버리되 사유는 화면에 드러낸다.
